@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Certificate of Authenticity - Toubina AI</title>
+
+    <!-- Fonts -->
+    <style>
+        @font-face {
+            font-family: MalgunGothic;
+            src: url('{{ malgun_path }}');
+        }
+
+        @font-face {
+            font-family: NanumGothic;
+            src: url('{{ nanum_path }}');
+        }
+    </style>
+
+    <!-- Page / Layout -->
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 15mm;
+        }
+
+        * {
+            font-family: "MalgunGothic", sans-serif;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container-wrapper {
+            width: 100%;
+            text-align: center;
+            padding-top: 10px;
+        }
+
+        .certificate-container {
+            width: 95%;
+            margin: 0 auto;
+            padding: 12px;
+            background-color: #ffffff;
+            text-align: center;
+        }
+
+        h1 {
+            color: #1a2c4e;
+            font-size: 34px;
+            margin: 10px 0 15px;
+            border-bottom: 2px solid #1a2c4e;
+            display: inline-block;
+            padding-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 18px;
+            font-style: italic;
+        }
+
+        .cert-id {
+            font-size: 18px;
+            color: #d90000;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .cert-body {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 18px;
+            color: #222;
+            padding: 0 10px;
+        }
+
+        .details {
+            font-size: 18px;
+            margin: 5px 0;
+        }
+
+        .verdict-box {
+            font-size: 26px;
+            font-weight: bold;
+            padding: 10px 26px;
+            border: 3px solid #ccc;
+            display: inline-block;
+            margin: 10px 0 14px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .confidence {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .warning {
+            color: #ef4444;
+            font-weight: bold;
+            font-size: 16px;
+            margin: 6px 0;
+        }
+
+        .user-info-box {
+            margin: 12px auto;
+            border: 1px solid #e5e5e5;
+            padding: 8px;
+            width: 80%;
+            background-color: #f9f9f9;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        .user-info-box p {
+            margin: 5px 0;
+        }
+
+        .signature-section {
+            margin-top: 28px;
+        }
+
+        .signature-text {
+            font-family: "NanumGothic", serif;
+            font-size: 24px;
+            font-style: italic;
+            color: #000c1f;
+            text-decoration: underline;
+            margin-bottom: 6px;
+        }
+
+        .signatory-title {
+            font-size: 14px;
+            color: #777;
+            margin-top: 8px;
+        }
+
+        .footer {
+            margin-top: 22px;
+            font-size: 12px;
+            color: #aaa;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-wrapper">
+        <div class="certificate-container">
+
+            <h1>{{ title|default('Certificate of Authenticity') }}</h1>
+            <div class="subtitle">{{ t.subtitle }}</div>
+
+            <div class="cert-id">
+                {{ t.cert_id_label }} {{ cert_id }}
+            </div>
+
+            <div class="cert-body">
+                {{ t.body_text | safe }}
+            </div>
+
+            <div class="details">
+                <strong>{{ t.date_label }}</strong> {{ date }}
+            </div>
+
+            <div class="verdict-box" style="border-color: {{ color }}; color: {{ color }};">
+                {{ verdict }}
+            </div>
+
+            <div class="confidence">
+                <strong>{{ t.confidence_label }}</strong> {{ confidence }}
+            </div>
+
+            {% if is_fake %}
+            <div class="warning">
+                {{ t.warning_text }}
+            </div>
+            {% endif %}
+
+            <div class="details" style="font-size:15px; color:#d90000;">
+                {{ disclaimer }}
+            </div>
+
+            {% if show_user_info %}
+            <div class="user-info-box">
+                <p><strong>{{ t.user_name_label }}</strong> {{ user_name }}</p>
+                <p><strong>{{ t.user_address_label }}</strong> {{ user_address }}</p>
+            </div>
+            {% endif %}
+
+            {% if show_signature %}
+            <div class="signature-section">
+                <div class="signature-text">{{ t.signatory_name }}</div>
+                <div class="signatory-title">
+                    {{ t.signatory_title | safe }}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="footer">
+                © 2026 AISolute Inc. | https://www.aisolute.com<br />
+                Powered by Toubina AI | mail: aisolute2378@naver.com
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>
