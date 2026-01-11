@@ -174,25 +174,47 @@ def analyze():
             except ImportError:
                  return jsonify({'error': 'YouTube download service not available'}), 500
         
-        process_log = f"Processing YouTube URL: {input_url}"
+        # 1. Cleaner URL Handling
+        input_url = input_url.strip()
+        
+        # Helper to simplify KBS mobile URLs which might confuse yt-dlp
+        if 'news.kbs.co.kr/news/mobile/view' in input_url:
+            current_app.logger.info("Converting KBS Mobile URL to Desktop URL for compatibility")
+            input_url = input_url.replace('/mobile/view/', '/view/')
+
+        process_log = f"Processing Video URL: {input_url}"
         current_app.logger.info(process_log)
         
         try:
             filename = f"yt_{int(time.time())}.mp4"
             filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             
+            # 2. Enhanced Options for Compatibility
             ydl_opts = {
                 'format': 'best[ext=mp4]/best',
                 'outtmpl': filepath,
                 'quiet': True,
-                'max_filesize': 50 * 1024 * 1024 
+                'noplaylist': True,
+                'max_filesize': 100 * 1024 * 1024, # Increased to 100MB
+                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'referer': input_url,
+                'ignoreerrors': True, # Skip errors in playlists
+                'no_warnings': True,
+                # 'force_generic_extractor': True, # Use this as last resort if needed
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([input_url])
+                info = ydl.extract_info(input_url, download=True)
+                # handle generic extractor returning no file
+                if not os.path.exists(filepath):
+                     # Try to find if the filename is different (sometimes yt-dlp changes ext)
+                     if info and 'ext' in info:
+                         alt_filepath = filepath.replace('.mp4', f".{info['ext']}")
+                         if os.path.exists(alt_filepath):
+                             filepath = alt_filepath
                 
             if not os.path.exists(filepath):
-                 return jsonify({'error': 'Failed to download video'}), 400
+                 return jsonify({'error': 'Failed to download video. The URL might be unsupported or the video is private.'}), 400
                  
             file_hash = calculate_file_hash(filepath)
             cert_id = get_cert_id(file_hash, request.remote_addr)
@@ -207,8 +229,11 @@ def analyze():
             return jsonify(data)
 
         except Exception as e:
-            current_app.logger.error(f"YouTube Error: {e}")
-            return jsonify({'error': str(e)}), 400
+            current_app.logger.error(f"Video Download Error: {e}")
+            msg = str(e)
+            if "Unsupported URL" in msg:
+                msg = "Unsupported Video URL. Please try a direct video link or a major platform (YouTube, etc)."
+            return jsonify({'error': msg}), 400
 
     # 2. Handle File Input (Existing)
     if 'file' not in request.files:

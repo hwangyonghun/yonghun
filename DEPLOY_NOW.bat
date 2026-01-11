@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 echo ========================================================
-echo        Toubina Global Deployment Assistant v1.3
+echo        Toubina Global Deployment Assistant v1.4
 echo ========================================================
 echo.
 
@@ -23,12 +23,6 @@ if "%GIT_PATH%"=="" (
 )
 if "%GIT_PATH%"=="" (
     if exist "C:\Users\%USERNAME%\AppData\Local\Programs\Git\cmd\git.exe" set "GIT_PATH=C:\Users\%USERNAME%\AppData\Local\Programs\Git\cmd\git.exe"
-)
-if "%GIT_PATH%"=="" (
-    :: Try GitHub Desktop internal git
-    for /d %%D in ("C:\Users\%USERNAME%\AppData\Local\GitHubDesktop\app-*") do (
-        if exist "%%D\resources\app\git\cmd\git.exe" set "GIT_PATH=%%D\resources\app\git\cmd\git.exe"
-    )
 )
 
 if "%GIT_PATH%"=="" (
@@ -57,27 +51,44 @@ if not exist .gitignore (
     echo .env >> .gitignore
     echo *.hwpx >> .gitignore
     echo *.bat >> .gitignore
+    echo *.mp4 >> .gitignore
+) else (
+    findstr /C:"*.mp4" .gitignore >nul
+    if errorlevel 1 echo *.mp4 >> .gitignore
 )
 
 :: --------------------------------------------------------
-:: 3. Nuclear Fix (Reset Remote State)
+:: 3. Remote Configuration (Robust)
 :: --------------------------------------------------------
 echo.
-echo [1/3] Cleaning repository state...
+echo [1/4] Configuring Remote Repository...
+"%GIT_PATH%" remote remove origin >nul 2>nul
+"%GIT_PATH%" remote add origin https://github.com/hwangyonghun/yonghun.git
+
+:: --------------------------------------------------------
+:: 4. Nuclear Fix (Reset Remote State)
+:: --------------------------------------------------------
+echo [2/4] Cleaning repository state...
 "%GIT_PATH%" rm -r --cached . >nul 2>nul
 
-echo [2/3] Adding all files...
+echo [3/4] Adding all files (excluding large files)...
 "%GIT_PATH%" add .
 "%GIT_PATH%" add Procfile --force
 
-echo [3/3] Committing changes...
-"%GIT_PATH%" commit -m "Fix deployment: Force clean directory structure and Procfile"
+echo [4/4] Committing changes...
+"%GIT_PATH%" commit -m "Deploy to Render" >nul 2>nul
 
-echo [4/3] Pushing to GitHub (Force Update)...
-"%GIT_PATH%" push origin main --force
+:: Switch to main just in case
+"%GIT_PATH%" branch -M main
 
 echo.
 echo ========================================================
+echo [ACTION REQUIRED] Pushing to GitHub...
+echo A login window may appear. Please log in!
+echo ========================================================
+"%GIT_PATH%" push -u origin main --force
+
+echo.
 if %errorlevel% neq 0 (
     echo [ERROR] Push failed!
     echo Check your internet connection or GitHub permissions.
