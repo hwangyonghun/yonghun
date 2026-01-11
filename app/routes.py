@@ -104,7 +104,12 @@ def get_cert_id(file_hash, user_identifier):
 
 @main.route('/')
 def index():
-    return render_template('index.html')
+    response = make_response(render_template('index.html'))
+    # Critical: Disable caching for main page to force UI updates
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 @main.route('/api/analyze', methods=['POST'])
 def analyze():
