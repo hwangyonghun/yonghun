@@ -26,3 +26,6 @@ def create_app(config_class=Config):
         db.create_all()
 
     return app
+
+# Expose app instance for 'gunicorn app:app' (Render default)
+app = create_app()

@@ -177,10 +177,17 @@ def analyze():
         # 1. Cleaner URL Handling
         input_url = input_url.strip()
         
-        # Helper to simplify KBS mobile URLs which might confuse yt-dlp
-        if 'news.kbs.co.kr/news/mobile/view' in input_url:
-            current_app.logger.info("Converting KBS Mobile URL to Desktop URL for compatibility")
-            input_url = input_url.replace('/mobile/view/', '/view/')
+        # Helper to simplify KBS Mobile URLs to correct Desktop Format
+        # Mobile: https://news.kbs.co.kr/news/mobile/view/view.do?ncd=8455511
+        # Desktop: https://news.kbs.co.kr/news/view.do?ncd=8455511
+        if 'news.kbs.co.kr/news/mobile/view/view.do' in input_url:
+            current_app.logger.info(f"Converting KBS Mobile URL: {input_url}")
+            input_url = input_url.replace('/news/mobile/view/view.do', '/news/view.do')
+            current_app.logger.info(f"Converted URL -> {input_url}")
+        
+        # General Mobile Cleanup for other sites if needed (e.g. m.youtube)
+        if 'm.youtube.com' in input_url:
+             input_url = input_url.replace('m.youtube.com', 'www.youtube.com')
 
         process_log = f"Processing Video URL: {input_url}"
         current_app.logger.info(process_log)
