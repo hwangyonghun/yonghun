@@ -698,6 +698,11 @@ def reset_db_force():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@main.route('/init-commercial-db', methods=['GET'])
+def init_commercial_db_alias():
+    # Alias for easier access if long URL fails
+    return reset_db_force()
+
 @main.route('/payment-success')
 def payment_success():
     """
