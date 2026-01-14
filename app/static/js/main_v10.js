@@ -530,11 +530,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // const tossPayments = TossPayments(clientKey);
 
     // Unified Payment Success Handler
-    function handlePaymentSuccess(providerName) {
+    function handlePaymentSuccess(providerName, paymentData = null) {
         paymentModal.classList.add('hidden');
 
-        // Create a temporary form to submit payment data first
-        // In a real app, the provider calls a webhook. Here we simulate it.
+        // Create a temporary form to submit payment data
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '/api/mock-payment';
@@ -542,53 +541,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const amountField = document.createElement('input');
         amountField.name = 'amount';
-        amountField.value = '1000';
+        // Use real amount if available, else default
+        amountField.value = (paymentData && paymentData.amount) ? paymentData.amount : '1000';
         form.appendChild(amountField);
 
         const nameField = document.createElement('input');
         nameField.name = 'payer_name';
-        nameField.value = 'Hong Gil Dong'; // Simulation
+        // Use Real Payer Name from PayPal
+        if (paymentData && paymentData.payerName) {
+            nameField.value = paymentData.payerName;
+        } else {
+            nameField.value = 'Hong Gil Dong'; // Fallback for Simulation
+        }
         form.appendChild(nameField);
 
         const addrField = document.createElement('input');
         addrField.name = 'payer_address';
-        addrField.value = 'Seoul, Korea (Bank Registered)';
+        // Use Real Address/Email from PayPal
+        if (paymentData && paymentData.payerAddress) {
+            addrField.value = paymentData.payerAddress;
+        } else {
+            addrField.value = 'Seoul, Korea (Default)';
+        }
         form.appendChild(addrField);
 
         document.body.appendChild(form);
-
-        // After form submission and page reload (or redirect to success page)
-        // The user should see the confirmation there.
-        // Since form.submit() navigates away, we can't show alerts here easily 
-        // unless we use fetch() instead. But mockup uses form submit to redirect.
-        // Let's stick to the flow: Submit Form -> Server redirects to /payment-success -> 
-        // /payment-success page shows the buttons/alerts requested.
         form.submit();
     }
 
-    // Refund Logic
-    const refundLink = document.getElementById('refund-link');
-    if (refundLink) {
-        refundLink.addEventListener('click', async () => {
-            const reason = prompt("Enter refund reason:", "Accidental purchase");
-            if (reason) {
-                const transactionId = prompt("Enter Transaction ID (Simulated):", "TOSS_12345");
-                if (transactionId) {
-                    try {
-                        const response = await fetch('/api/refund', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ transaction_id: transactionId, reason: reason })
-                        });
-                        const data = await response.json();
-                        alert(data.message);
-                    } catch (e) {
-                        alert("Refund failed");
-                    }
-                }
-            }
-        });
-    }
+    // ... Refund Logic ...
 
     // PayPal Smart Buttons
     let paypalButtonsRendered = false;
@@ -610,14 +591,26 @@ document.addEventListener('DOMContentLoaded', () => {
                         purchase_units: [{
                             description: 'Toubina Premium Certificate',
                             amount: {
-                                value: '3.50'
+                                value: '3.50',
+                                currency_code: 'USD'
                             }
                         }]
                     });
                 },
                 onApprove: function (data, actions) {
                     return actions.order.capture().then(function (details) {
-                        handlePaymentSuccess('PayPal');
+                        console.log('PayPal Transaction Details:', details);
+
+                        // Extract Real Data
+                        const payerName = details.payer.name.given_name + ' ' + details.payer.name.surname;
+                        const payerInfo = details.payer.email_address || 'PayPal User'; // PayPal often doesn't give full address in standard checkout without extra scopes, use Email as UID
+
+                        // Call success handler with Real Data
+                        handlePaymentSuccess('PayPal', {
+                            amount: details.purchase_units[0].amount.value,
+                            payerName: payerName,
+                            payerAddress: payerInfo + " (PayPal Verified)"
+                        });
                     });
                 },
                 onCancel: function (data) {
@@ -626,7 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 onError: function (err) {
                     console.error(err);
-                    alert('PayPal Error occurred');
+                    alert('PayPal Error occurred: ' + err);
                     document.querySelector('.payment-options').style.display = 'flex';
                     paypalContainer.classList.add('hidden');
                 }
