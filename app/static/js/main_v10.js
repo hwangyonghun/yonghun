@@ -803,6 +803,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateLanguage(lang) {
         const t = i18n[lang] || i18n['US'];
 
+        // Crucial for Browser Detection (Edge, Chrome)
+        document.documentElement.lang = (lang === 'KR' ? 'ko' : 'en');
+
         // Hero
         document.querySelector('.hero h1').innerHTML = t.hero_title;
         document.querySelector('.hero p').innerText = t.hero_desc;
