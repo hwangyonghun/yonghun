@@ -1,0 +1,9 @@
+Flask
+Flask-SQLAlchemy
+Werkzeug
+gunicorn
+requests
+numpy
+xhtml2pdf
+yt-dlp
+Pillow

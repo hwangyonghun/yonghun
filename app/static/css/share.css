@@ -1,0 +1,200 @@
+/* =========================================================
+   Event FAB & Share Modal
+   ========================================================= */
+
+.event-fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    color: #ffffff;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1200;
+    /* ensure above modals */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    box-shadow: 0 10px 20px rgba(255, 65, 108, 0.4);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.event-fab:hover {
+    transform: scale(1.05);
+    box-shadow: 0 14px 28px rgba(255, 65, 108, 0.55);
+}
+
+.event-fab:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 3px;
+}
+
+/* =========================================================
+   Share Card
+   ========================================================= */
+
+.share-card {
+    max-width: 500px;
+    width: 90%;
+    background: rgba(15, 23, 42, 0.95);
+    border-radius: 12px;
+}
+
+/* =========================================================
+   Header
+   ========================================================= */
+
+.share-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.share-header h3 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.share-header p {
+    color: #94a3b8;
+    font-size: 0.95rem;
+}
+
+.highlight {
+    color: #facc15;
+    font-weight: bold;
+}
+
+/* =========================================================
+   Share Grid
+   ========================================================= */
+
+.share-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.share-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #cbd5e1;
+    font-size: 0.8rem;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.share-item:hover {
+    transform: translateY(-3px);
+    color: #ffffff;
+}
+
+.share-item:focus-visible {
+    outline: 2px solid #facc15;
+    outline-offset: 4px;
+}
+
+/* unified icon style */
+.share-icon {
+    font-size: 1.5rem;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* =========================================================
+   Brand Hover Colors
+   ========================================================= */
+
+.share-item.fb:hover .share-icon {
+    background: #1877f2;
+}
+
+.share-item.x:hover .share-icon {
+    background: #000000;
+}
+
+.share-item.in:hover .share-icon {
+    background: #0077b5;
+}
+
+.share-item.insta:hover .share-icon {
+    background: linear-gradient(45deg,
+            #f09433,
+            #e6683c,
+            #dc2743,
+            #cc2366,
+            #bc1888);
+}
+
+.share-item.tiktok:hover .share-icon {
+    background: #000000;
+}
+
+.share-item.yt:hover .share-icon {
+    background: #ff0000;
+}
+
+.share-item.kakao:hover .share-icon {
+    background: #fee500;
+    color: #3c1e1e;
+}
+
+.share-item.band:hover .share-icon {
+    background: #00ce23;
+}
+
+/* =========================================================
+   Copy Link
+   ========================================================= */
+
+.copy-link {
+    display: flex;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.copy-link input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    outline: none;
+}
+
+.copy-link input::placeholder {
+    color: #64748b;
+}
+
+.copy-link button {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #ffffff;
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.copy-link button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.copy-link button:focus-visible {
+    outline: 2px solid #facc15;
+    outline-offset: 2px;
+}

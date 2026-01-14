@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toubina | Deepfake Detection - aisolute.com</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/share.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Payment SDKs -->
+    <script src="https://js.tosspayments.com/v1/payment"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+</head>
+
+<body>
+    <div class="background-glob"></div>
+    <div class="background-glob glob-2"></div>
+
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Toubina</span>
+        </div>
+        <div class="nav-right">
+            {% if session.get('user_id') %}
+            <div class="user-profile" style="display: flex; align-items: center; gap: 10px;">
+                <img src="{{ session.get('user_pic') }}" alt="User"
+                    style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--primary);">
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-size: 0.9rem; font-weight: 600;">{{ session.get('user_name') }}</span>
+                    <a href="{{ url_for('auth.logout') }}"
+                        style="font-size: 0.8rem; color: var(--text-muted); text-decoration: none;">Logout</a>
+                </div>
+            </div>
+            {% else %}
+            <a href="{{ url_for('auth.login_page') }}" class="cta-btn small">
+                <i class="fa-solid fa-right-to-bracket"></i> Login
+            </a>
+            {% endif %}
+
+            <div class="lang-selector">
+                <select id="language-select">
+                    <option value="US">🇺🇸 English</option>
+                    <option value="KR">🇰🇷 한국어</option>
+                </select>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- ... (Hero and Interface remain same) ... -->
+        <header class="hero">
+            <h1>Is this face <span class="gradient-text">Real?</span></h1>
+            <p>Deepfake Detection, Authenticity Certificate (10 Free), Illegal Usage Tracking System</p>
+        </header>
+
+        <div class="detector-interface">
+            <div class="input-tabs">
+                <button class="tab-btn active" data-tab="upload">Image/File<br>Upload</button>
+                <button class="tab-btn" data-tab="url">Video<br>Upload</button>
+                <button class="tab-btn" data-tab="tracking">Tracking Detection<br>& Protection</button>
+                <button class="tab-btn" data-tab="marketing">Marketing<br>Tools</button>
+            </div>
+
+            <!-- File Upload Section -->
+            <div class="upload-zone" id="drop-zone">
+                <input type="file" id="file-input" accept="image/*,.pdf,.mp4,.avi,.mov" hidden>
+                <div class="upload-content" id="upload-content">
+                    <div class="icon-container">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <h3>Please upload an image here!</h3>
+                    <p>Or drag and drop files.</p>
+                    <span class="file-info">Supports Images, PDF & Video</span>
+                </div>
+
+                <div class="preview-container hidden" id="preview-container">
+                    <img id="image-preview" src="" alt="Preview">
+                    <div id="vid-preview-icon" class="hidden"></div>
+                    <div id="pdf-preview-icon" class="hidden"></div>
+                    <button id="remove-btn" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+
+            <!-- URL Input Section -->
+            <div class="url-zone hidden" id="url-zone">
+                <div class="url-input-wrapper">
+                    <i class="fa-brands fa-youtube" style="color: #ff0000;"></i>
+                    <i class="fa-brands fa-instagram" style="color: #e1306c;"></i>
+                    <i class="fa-brands fa-tiktok" style="color: #00f2ea;"></i>
+                    <input type="text" id="youtube-url" placeholder="Paste YouTube, Instagram, TikTok Link...">
+                </div>
+                <p class="url-hint">Supported: YouTube, Instagram Reels, TikTok (Up to 10 min)</p>
+            </div>
+
+            <!-- Marketing Zone -->
+            <div class="url-zone hidden" id="marketing-zone">
+                <div class="marketing-card">
+                    <i class="fa-brands fa-youtube" style="color: #ff0000; font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h3>YouTube Marketing Automation</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Create a promotional video for Toubina
+                        and upload it directly to your channel.</p>
+
+                    <button id="create-promo-btn" class="cta-btn"
+                        style="background: var(--surface); border: 1px solid var(--primary); margin-bottom: 1rem;">
+                        <i class="fa-solid fa-video"></i> Generate Promo Video
+                    </button>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+                        <button id="upload-yt-btn" class="cta-btn" style="background: #ff0000;">
+                            <i class="fa-brands fa-youtube"></i> Upload to YouTube
+                        </button>
+
+                        <button id="upload-insta-btn" class="cta-btn"
+                            style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);">
+                            <i class="fa-brands fa-instagram"></i> Upload to Instagram Reels
+                        </button>
+
+                        <button id="upload-tiktok-btn" class="cta-btn"
+                            style="background: #000000; border: 1px solid #333;">
+                            <i class="fa-brands fa-tiktok" style="color: #00f2ea;"></i> <span
+                                style="margin-left:5px; color: #ff0050;">Upload to TikTok</span>
+                        </button>
+                    </div>
+
+                    <div id="promo-status" class="hidden" style="margin-top: 1rem; color: var(--success);"></div>
+                </div>
+            </div>
+
+            <!-- Tracking Zone -->
+            <div class="url-zone hidden" id="tracking-zone">
+                <div class="marketing-card">
+                    <i class="fa-solid fa-radar" style="color: #10b981; font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h3 id="track-title">Illegal Usage Tracking</h3>
+                    <p id="track-desc" style="color: var(--text-muted); margin-bottom: 2rem;">
+                        Monitor the web for unauthorized use of your content.
+                    </p>
+
+                    <div class="features-grid"
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; width: 100%; text-align: center;">
+
+                        <div class="feature-item"
+                            style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <i class="fa-solid fa-magnifying-glass-chart"
+                                style="color: #6366f1; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                            <h4 class="feat-title-1" style="font-size: 0.9rem; margin-bottom: 0.2rem;">Auto Detection
+                            </h4>
+                            <p class="feat-desc-1" style="font-size: 0.8rem; color: var(--text-muted);">SNS, Mall, Blog,
+                                Community</p>
+                        </div>
+
+                        <div class="feature-item"
+                            style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <i class="fa-solid fa-bell"
+                                style="color: #f59e0b; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                            <h4 class="feat-title-2" style="font-size: 0.9rem; margin-bottom: 0.2rem;">Real-time Alerts
+                            </h4>
+                            <p class="feat-desc-2" style="font-size: 0.8rem; color: var(--text-muted);">Instant
+                                notification
+                            </p>
+                        </div>
+
+                        <div class="feature-item"
+                            style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <i class="fa-solid fa-robot"
+                                style="color: #ec4899; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                            <h4 class="feat-title-3" style="font-size: 0.9rem; margin-bottom: 0.2rem;">Auto Response
+                            </h4>
+                            <p class="feat-desc-3" style="font-size: 0.8rem; color: var(--text-muted);">Auto
+                                countermeasures
+                            </p>
+                        </div>
+
+                        <div class="feature-item"
+                            style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <i class="fa-solid fa-envelope-open-text"
+                                style="color: #3b82f6; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                            <h4 class="feat-title-4" style="font-size: 0.9rem; margin-bottom: 0.2rem;">Warning Emails
+                            </h4>
+                            <p class="feat-desc-4" style="font-size: 0.8rem; color: var(--text-muted);">Auto-send custom
+                                warnings</p>
+                        </div>
+
+                        <div class="feature-item"
+                            style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <i class="fa-solid fa-gavel"
+                                style="color: #ef4444; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                            <h4 class="feat-title-5" style="font-size: 0.9rem; margin-bottom: 0.2rem;">Takedown Request
+                            </h4>
+                            <p class="feat-desc-5" style="font-size: 0.8rem; color: var(--text-muted);">Auto broadcast
+                                deletion
+                            </p>
+                        </div>
+                    </div>
+
+                    <button class="cta-btn" style="margin-top: 2rem;">
+                        <i class="fa-solid fa-shield-cat"></i> <span class="btn-track-start">Activate Protection</span>
+                    </button>
+                </div>
+            </div>
+
+            <button id="analyze-btn" class="cta-btn hidden">
+                <span class="btn-text">Analyze Authenticity</span>
+                <span class="loader hidden"></span>
+            </button>
+
+            <div id="result-overlay" class="result-overlay">
+                <div class="result-card" id="result-card">
+                    <div class="verdict-icon" id="verdict-icon">
+                        <!-- JS injected -->
+                    </div>
+                    <h2 id="verdict-text">--</h2>
+                    <p id="explanation-text" class="explanation-text"></p>
+                    <div class="confidence-meter">
+                        <div class="meter-label">Confidence</div>
+                        <div class="meter-bar-bg">
+                            <div class="meter-bar-fill" id="confidence-bar"></div>
+                        </div>
+                        <div class="confidence-value" id="confidence-value">0%</div>
+                    </div>
+                    <button id="reset-btn" class="secondary-btn">New Scan</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Payment SDKs -->
+    <script src="https://js.tosspayments.com/v1/payment-widget"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="payment-modal hidden">
+        <div class="payment-card">
+            <button class="close-modal" id="close-payment"><i class="fa-solid fa-xmark"></i></button>
+            <h3>Unlock Premium Certificate</h3>
+            <p>Get a verified digital certificate of this analysis.</p>
+
+            <div class="payment-options">
+                <button class="payment-btn toss" id="pay-toss">
+                    <span class="pay-icon">🇰🇷</span>
+                    <div class="pay-info">
+                        <strong>Toss Payments</strong>
+                        <span>3,500 KRW</span>
+                    </div>
+                </button>
+
+                <button class="payment-btn paypal" id="pay-paypal">
+                    <span class="pay-icon">🇺🇸</span>
+                    <div class="pay-info">
+                        <strong>PayPal</strong>
+                        <span>$3.50 USD</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Widget Container -->
+            <div id="payment-method"></div>
+            <button id="toss-pay-submit" class="cta-btn hidden" style="width:100%; margin-top:1rem;">Make Payment (3,500
+                KRW)</button>
+
+            <button id="refund-link"
+                style="background:none; border:none; color: var(--text-muted); text-decoration: underline; margin-top: 1rem; cursor: pointer; font-size: 0.85rem;">
+                Request Refund for previous order
+            </button>
+
+            <div id="paypal-button-container" class="hidden" style="margin-top: 1rem;"></div>
+            <p id="paypal-sandbox-msg" class="hidden"
+                style="color: #f59e0b; font-size: 0.8rem; margin-top: 0.5rem; text-align: center;">
+                <i class="fa-solid fa-flask"></i> Sandbox Mode: Use a test account. Real SMS codes are NOT sent.
+                <br>For testing, try: <code>sb-test@business.example.com</code> / <code>password123</code> (Generic)
+            </p>
+        </div>
+    </div>
+
+
+
+    <script src="{{ url_for('static', filename='js/main_v10.js') }}?v=final_fix_2"></script>
+
+    <footer style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.9rem; margin-top: auto;">
+        &copy; 2026 AISolute co ltd. | <a href="https://www.aisolute.com"
+            style="color: inherit; text-decoration: none;">https://www.aisolute.com</a> | e-mail: aisolute1676@naver.com
+    </footer>
+</body>
+
+</html>
