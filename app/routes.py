@@ -651,26 +651,37 @@ def mock_payment():
     Simulate a payment gateway callback.
     Creates a Payment record with specific Payer Name/Address.
     """
-    if 'user_id' not in session:
-        return jsonify({'error': 'Login required'}), 401
-        
+    # FIX: Allow payment even if not logged in (for Guest Checkout simulation)
+    # If logged in, we save the record for strict validation.
+    # If not, we just pretend it succeeded (Anonymous Payment).
+    
     payer_name = request.form.get('payer_name')
     payer_address = request.form.get('payer_address')
     amount = float(request.form.get('amount', 1000))
+
+    if 'user_id' in session:
+        # Create Payment Record for logged-in user
+        payment = Payment(
+            user_id=session['user_id'],
+            transaction_id=str(uuid.uuid4()),
+            amount=amount,
+            currency="USD",
+            status="COMPLETED",
+            payer_name=payer_name,
+            payer_address=payer_address,
+            created_at=datetime.datetime.utcnow()
+        )
+        db.session.add(payment)
+        db.session.commit()
+    else:
+        # User is Guest. We can't save 'user_id' linkage.
+        # For this demo, we just proceed. 
+        # (In real app, we might create a shadow user or save to session)
+        session['is_guest_paid'] = True # Simple flag for guest session
+        pass
     
-    # Create Payment Record
-    payment = Payment(
-        user_id=session['user_id'],
-        transaction_id=str(uuid.uuid4()),
-        amount=amount,
-        currency="USD",
-        status="COMPLETED",
-        payer_name=payer_name,
-        payer_address=payer_address,
-        created_at=datetime.datetime.utcnow()
-    )
-    db.session.add(payment)
-    db.session.commit()
+    # Redirect to success page
+    return redirect(url_for('main.payment_success'))
     
     # Redirect to success page
     return redirect(url_for('main.payment_success'))
