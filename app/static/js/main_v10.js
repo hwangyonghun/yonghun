@@ -724,6 +724,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'tab_marketing': 'Marketing<br>Tools',
             'upload_hint': 'Please upload an image here!',
             'upload_sub': 'Or drag and drop files.',
+            'upload_info': 'Supports Images, PDF & Video',
             'url_placeholder': 'Paste YouTube, Instagram, TikTok Link...',
             'url_hint': 'Supported: YouTube, Instagram Reels, TikTok (Up to 10 min)',
             'marketing_title': 'YouTube Marketing Automation',
@@ -764,6 +765,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'tab_marketing': '마케팅<br>도구',
             'upload_hint': '여기에 이미지를 업로드 해주세요!',
             'upload_sub': '또는 파일을 드래그 해주세요.',
+            'upload_info': '지원: 이미지, PDF, 동영상',
             'url_placeholder': '유튜브, 인스타그램, 틱톡 링크 붙여넣기...',
             'url_hint': '지원: 유튜브, 인스타그램 릴스, 틱톡 (최대 10분)',
             'marketing_title': '유튜브 마케팅 자동화',
@@ -817,6 +819,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (uploadBox) uploadBox.innerText = t.upload_hint;
         const uploadSub = document.querySelector('.upload-content p');
         if (uploadSub) uploadSub.innerText = t.upload_sub;
+        const uploadInfo = document.querySelector('.file-info');
+        if (uploadInfo) uploadInfo.innerText = t.upload_info;
 
         // URL
         const urlIn = document.getElementById('youtube-url');
