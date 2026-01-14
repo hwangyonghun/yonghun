@@ -679,9 +679,24 @@ def mock_payment():
     
     # Redirect to success page
     return redirect(url_for('main.payment_success'))
+
+
+@main.route('/api/admin/reset-db-force', methods=['GET'])
+def reset_db_force():
+    """
+    CRITICAL: Resets the entire database.
+    Usage: /api/admin/reset-db-force?key=COMMERCIAL_LAUNCH_2026
+    """
+    key = request.args.get('key')
+    if key != 'COMMERCIAL_LAUNCH_2026':
+        return jsonify({'error': 'Unauthorized'}), 401
     
-    # Redirect to success page
-    return redirect(url_for('main.payment_success'))
+    try:
+        db.drop_all()
+        db.create_all()
+        return jsonify({'message': 'DATABASE RESET COMPLETE. All tables dropped and recreated. Readiness for Commercial Service confirmed.'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @main.route('/payment-success')
 def payment_success():
