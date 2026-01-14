@@ -62,6 +62,10 @@ def social_login(provider):
     For this prototype/demo, it automatically treats the user as 'Verified'.
     """
     # Simulate data based on provider
+    # Generating a pseudo-unique ID based on time to allow multiple test accounts if needed
+    # OR keep it fixed for consistent demo login? 
+    # User complained about error. Likely DB constraint.
+    # Let's use a fixed demo user but handle DB errors robustly.
     mock_data = {
         'google': {'email': 'demo_user@gmail.com', 'name': 'Demo User', 'id': 'google_12345'},
         'naver': {'email': 'demo_user@naver.com', 'name': 'Kim Demo', 'id': 'naver_67890'},
@@ -70,32 +74,32 @@ def social_login(provider):
     
     data = mock_data.get(provider, mock_data['google'])
     
-    # Check or Create User
-    user = User.query.filter_by(social_id=data['id'], provider=provider).first()
-    if not user:
-        # Check if email already exists to prevent integrity error
-        existing_user = User.query.filter_by(email=data['email']).first()
-        
-        if existing_user:
-            # Link to existing account
-            user = existing_user
-            user.social_id = data['id']
-            user.provider = provider
-            # Update profile pic if missing
-            if not user.profile_pic:
-                 user.profile_pic = f"https://ui-avatars.com/api/?name={data['name']}&background=random"
+    try:
+        # Check or Create User
+        user = User.query.filter_by(social_id=data['id'], provider=provider).first()
+        if not user:
+            # Check if email already exists
+            existing_user = User.query.filter_by(email=data['email']).first()
+            
+            if existing_user:
+                user = existing_user
+                user.social_id = data['id']
+                user.provider = provider
+            else:
+                user = User(
+                    name=data['name'],
+                    email=data['email'],
+                    provider=provider,
+                    social_id=data['id'],
+                    profile_pic=f"https://ui-avatars.com/api/?name={data['name']}&background=random"
+                )
+                db.session.add(user)
+            
             db.session.commit()
-        else:
-            # Create new user
-            user = User(
-                name=data['name'],
-                email=data['email'],
-                provider=provider,
-                social_id=data['id'],
-                profile_pic=f"https://ui-avatars.com/api/?name={data['name']}&background=random"
-            )
-            db.session.add(user)
-            db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        # Fallback: Return to login with error message instead of 500 crash
+        return render_template('login.html', error=f"System Error: {str(e)}")
     
     session['user_id'] = user.id
     session['user_name'] = user.name
