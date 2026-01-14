@@ -56,11 +56,23 @@
 
 <body>
     <div class="container">
-        <h1>Payment Successful</h1>
-        <p>Payment successful.<br>Proceeding to certificate issuance.</p>
-        <!-- Directly link to certificate generation with paid=true flag (simulated) -->
-        <a href="/api/certificate?paid=true&lang=US" class="btn">Proceed</a>
+        <h1>Payment completed successfully.</h1>
+        <p>Thank you for using Toubina Premium Service.</p>
+
+        <!-- Button triggers JS flow instead of direct link -->
+        <button id="proceed-btn" class="btn" style="border:none; cursor:pointer;">Proceed to Certificate
+            Issuance</button>
     </div>
+
+    <script>
+        document.getElementById('proceed-btn').addEventListener('click', () => {
+            // 1. Show the specific required alert
+            alert("We will proceed with issuing the certificate.");
+
+            // 2. Redirect to certificate issuance
+            window.location.href = '/api/certificate?paid=true&lang=US';
+        });
+    </script>
 </body>
 
 </html>

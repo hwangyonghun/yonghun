@@ -525,8 +525,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function handlePaymentSuccess(providerName) {
         paymentModal.classList.add('hidden');
 
-        // Create form to submit to mock-payment endpoint
-        // This simulates a callback from the payment provider with Payer Info
+        // Create a temporary form to submit payment data first
+        // In a real app, the provider calls a webhook. Here we simulate it.
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '/api/mock-payment';
@@ -534,16 +534,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const amountField = document.createElement('input');
         amountField.name = 'amount';
-        amountField.value = '1000'; // Demo amount
+        amountField.value = '1000';
         form.appendChild(amountField);
 
         const nameField = document.createElement('input');
         nameField.name = 'payer_name';
-        // SIMULATION: Sending a "Simulated Bank Account Name"
-        // In real life, this comes from the bank. 
-        // For this demo, we can hardcode a test name or leave it to be verified.
-        // Let's use a standard name that the user can likely match if they change their profile name.
-        nameField.value = 'Hong Gil Dong';
+        nameField.value = 'Hong Gil Dong'; // Simulation
         form.appendChild(nameField);
 
         const addrField = document.createElement('input');
@@ -552,6 +548,13 @@ document.addEventListener('DOMContentLoaded', () => {
         form.appendChild(addrField);
 
         document.body.appendChild(form);
+
+        // After form submission and page reload (or redirect to success page)
+        // The user should see the confirmation there.
+        // Since form.submit() navigates away, we can't show alerts here easily 
+        // unless we use fetch() instead. But mockup uses form submit to redirect.
+        // Let's stick to the flow: Submit Form -> Server redirects to /payment-success -> 
+        // /payment-success page shows the buttons/alerts requested.
         form.submit();
     }
 

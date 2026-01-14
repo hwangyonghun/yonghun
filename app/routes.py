@@ -400,51 +400,56 @@ def certificate():
     # Since we don't have login for everyone yet, we use IP or Session.
     # Session['usage_count'] would be better.
     
-    # Let's fix the Usage Count logic to be Session based.
+    # --- Payment & Usage Logic ---
     session_usage = session.get('usage_count', 0)
     
-    user_name = ""
-    user_address = ""
+    # 1. Check Usage Limit (< 10 Free, >= 10 Paid)
+    if session_usage >= 10 and not paid:
+        return jsonify({'message': 'Free limit reached (10 uses). Please purchase Premium to continue.', 'limit_reached': True}), 403
+
+    user_name = None
+    user_address = None
     show_user_info = False
 
-    # Rule: < 10 skip, >= 10 show
-    # Rule: Strict Validation against Payment Record
-    # Only show User Info if (Login Name == Payment Name)
+    # 4. Strict Identity Verification (Only for Paid Requests)
     if paid:
         if 'user_id' in session:
             user = User.query.get(session['user_id'])
-            # Find latest COMPLETED payment for this user
+            # Find latest COMPLETED payment
             payment = Payment.query.filter_by(user_id=user.id, status='COMPLETED').order_by(Payment.created_at.desc()).first()
             
             if user and payment and payment.payer_name:
-                # Normalize and Compare
-                u_name = user.name.strip().replace(" ", "").lower()
-                p_name = payment.payer_name.strip().replace(" ", "").lower()
+                # Normalize and Compare (Strict Match)
+                u_name_norm = user.name.strip().replace(" ", "").lower() if user.name else ""
+                p_name_norm = payment.payer_name.strip().replace(" ", "").lower()
                 
-                if u_name == p_name:
-                    # Match -> Use Payment Details
+                if u_name_norm == p_name_norm:
+                    # MATCH: Use Payment Info
                     user_name = payment.payer_name
                     user_address = payment.payer_address
                     show_user_info = True
-                    
-                    current_cert.user_name = user_name
-                    current_cert.user_address = user_address
-                    current_cert.ip_address = ip_address
-                    db.session.commit()
                 else:
-                    # Mismatch -> Anonymous
-                    current_cert.user_name = None
-                    current_cert.user_address = None
-                    db.session.commit()
+                    # MISMATCH: Force Anonymous (Blank)
+                    user_name = None
+                    user_address = None
+                    show_user_info = False
+            else:
+                 # No payment record or user name missing -> Anonymous
+                 show_user_info = False
+        else:
+            # Not logged in -> Anonymous
+            show_user_info = False
+            
+        # Update Certificate Record with Result
+        current_cert.user_name = user_name
+        current_cert.user_address = user_address
+        db.session.commit()
     else:
-        # Free / Non-Paid -> Anonymous
-        pass
-        # Increment usage if free tier and not just re-downloading same file?
-        # If it's the same file, maybe don't increment? 
-        # But `process_result` (which stores session result) is called on every analysis.
-        # We should increment usage in `process_result` or `analyze`.
-        # Since we are in `certificate` (download) route, we just check.
-        pass
+        # Free Tier (< 10) -> Always Anonymous
+        # Ensure older data is cleared if re-downloading as free
+        current_cert.user_name = None
+        current_cert.user_address = None
+        db.session.commit()
     
     # Language Selection
     lang = request.args.get('lang', 'US')
