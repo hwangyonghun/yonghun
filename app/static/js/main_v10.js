@@ -576,7 +576,8 @@ document.addEventListener('DOMContentLoaded', () => {
     payPaypalBtn.addEventListener('click', () => {
         document.querySelector('.payment-options').style.display = 'none';
         paypalContainer.classList.remove('hidden');
-        document.getElementById('paypal-sandbox-msg').classList.remove('hidden');
+        // Sandbox message hidden for Live Mode
+        // document.getElementById('paypal-sandbox-msg').classList.remove('hidden');
 
         if (!paypalButtonsRendered) {
             paypal.Buttons({
