@@ -73,15 +73,29 @@ def social_login(provider):
     # Check or Create User
     user = User.query.filter_by(social_id=data['id'], provider=provider).first()
     if not user:
-        user = User(
-            name=data['name'],
-            email=data['email'],
-            provider=provider,
-            social_id=data['id'],
-            profile_pic=f"https://ui-avatars.com/api/?name={data['name']}&background=random"
-        )
-        db.session.add(user)
-        db.session.commit()
+        # Check if email already exists to prevent integrity error
+        existing_user = User.query.filter_by(email=data['email']).first()
+        
+        if existing_user:
+            # Link to existing account
+            user = existing_user
+            user.social_id = data['id']
+            user.provider = provider
+            # Update profile pic if missing
+            if not user.profile_pic:
+                 user.profile_pic = f"https://ui-avatars.com/api/?name={data['name']}&background=random"
+            db.session.commit()
+        else:
+            # Create new user
+            user = User(
+                name=data['name'],
+                email=data['email'],
+                provider=provider,
+                social_id=data['id'],
+                profile_pic=f"https://ui-avatars.com/api/?name={data['name']}&background=random"
+            )
+            db.session.add(user)
+            db.session.commit()
     
     session['user_id'] = user.id
     session['user_name'] = user.name
