@@ -500,6 +500,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const paypalContainer = document.getElementById('paypal-button-container');
 
     function openPaymentModal() {
+        // Strict Login Requirement Check
+        // If user profile element is missing, they are not logged in.
+        const userProfile = document.querySelector('.user-profile');
+        if (!userProfile) {
+            alert("Login is required for payment and strict identity verification.\nRedirecting to login page...");
+            window.location.href = "/auth/login"; // Adjust path if needed, usually /login or /auth/login
+            return;
+        }
         paymentModal.classList.remove('hidden');
     }
 

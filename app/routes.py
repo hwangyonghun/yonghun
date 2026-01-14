@@ -674,11 +674,8 @@ def mock_payment():
         db.session.add(payment)
         db.session.commit()
     else:
-        # User is Guest. We can't save 'user_id' linkage.
-        # For this demo, we just proceed. 
-        # (In real app, we might create a shadow user or save to session)
-        session['is_guest_paid'] = True # Simple flag for guest session
-        pass
+        # Should not happen due to frontend check, but if forced:
+        return jsonify({'error': 'Login required for identity verification'}), 401
     
     # Redirect to success page
     return redirect(url_for('main.payment_success'))
