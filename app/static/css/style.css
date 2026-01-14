@@ -153,8 +153,8 @@ body {
 
 .detector-interface {
     width: 100%;
-    max-width: 800px;
-    /* Reduced from 1000px for better balance */
+    max-width: 500px;
+    /* Reduced to 500px per request */
     margin: 0 auto;
     margin-top: 2rem;
     display: flex;
