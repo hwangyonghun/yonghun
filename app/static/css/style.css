@@ -139,27 +139,27 @@ body {
 }
 
 /* Detector Interface */
-.detector-interface {
-    width: 100%;
-    max-width: 500px;
-    position: relative;
-}
+/* Redundant .detector-interface block removed, handled below */
 
 /* Component Centering */
-.hero,
-.detector-interface {
+.hero {
     width: 100%;
     max-width: 600px;
-    /* Constrain width for better mobile view */
     margin: 0 auto;
-    /* Ensure these blocks are centered */
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
 .detector-interface {
+    width: 100%;
+    max-width: 1000px;
+    /* Widened for horizontal layout */
+    margin: 0 auto;
     margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .upload-zone {
@@ -172,7 +172,11 @@ body {
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    width: 100%;
+    /* Enforce Horizontal Aspect Ratio */
+    aspect-ratio: 16 / 9;
     min-height: 300px;
+    /* Fallback */
     display: flex;
     flex-direction: column;
     justify-content: center;
